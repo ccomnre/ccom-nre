@@ -7,10 +7,10 @@ window.OH_CONFIG = {
   // Di file Cost Control: File > Bagikan > Publikasikan ke web > pilih sheet > format CSV > Publikasikan.
   // Ulangi untuk tiap sheet, lalu tempel link-nya di bawah.
   costControlCsv: {
-    har: '', // sheet "Har_GoogleStudio"  (biaya pemeliharaan)
-    ai: '',  // sheet "AI Murni_perUnit"  (AI murni terkontrak)
-    aki: '', // sheet "AKI_perUnit"       (AKI terdisburse)
-    ej: '',  // sheet "EJ_DataStudio"     (progres fisik project)
+    har: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBJrtOfIGD5Blji_3f084TVbjLsNWrP5QK3Dcok4xPRrUx9JP5qpFH2QBpPckAxdCu79_1avkhmZEb/pub?gid=364730950&single=true&output=csv', // sheet "Har_GoogleStudio"  (biaya pemeliharaan)
+    ai: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBJrtOfIGD5Blji_3f084TVbjLsNWrP5QK3Dcok4xPRrUx9JP5qpFH2QBpPckAxdCu79_1avkhmZEb/pub?gid=610915043&single=true&output=csv',  // sheet "AI Murni_perUnit"  (AI murni terkontrak)
+    aki: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBJrtOfIGD5Blji_3f084TVbjLsNWrP5QK3Dcok4xPRrUx9JP5qpFH2QBpPckAxdCu79_1avkhmZEb/pub?gid=1315088848&single=true&output=csv', // sheet "AKI_perUnit"       (AKI terdisburse)
+    ej: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBJrtOfIGD5Blji_3f084TVbjLsNWrP5QK3Dcok4xPRrUx9JP5qpFH2QBpPckAxdCu79_1avkhmZEb/pub?gid=1443913689&single=true&output=csv',  // sheet "EJ_DataStudio"     (progres fisik project)
   },
 
   // Muat ulang data otomatis setiap N menit selama halaman terbuka (0 = mati).
