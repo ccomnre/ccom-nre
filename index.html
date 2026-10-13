@@ -2110,7 +2110,7 @@ dash.calc('harian_ringkas', {
   function drawCum(sel, lgSel, D, bln, up, fAxis, fTip) {
     const el = root.querySelector(sel); clearSvg(el);
     const PC = dash.colors[2];
-    legend(root.querySelector(lgSel), [['Realisasi s.d.', dash.colors[0], true], ['Rencana s.d.', 'var(--cds-chart-muted)', true], ['Pencapaian (s.d. bulan)', PC, true]]);
+    legend(root.querySelector(lgSel), [['Realisasi s.d.', dash.colors[0], true], ['Rencana s.d.', dash.colors[1], true], ['Pencapaian (s.d. bulan)', PC, true]]);
     if (D.status === 'error') return fail(el);
     if (D.status !== 'ok' || !el.clientWidth) return;
     if (bln.m1 > bln.m2) return;
@@ -2129,7 +2129,8 @@ dash.calc('harian_ringkas', {
     svg.append('g').selectAll('text').data(t2).join('text').attr('x', w - m.r + 6).attr('y', (d) => y2(d) + 4).style('fill', PC).text((d) => fPct(d));
     svg.append('g').selectAll('text').data(rows).join('text').attr('x', (r) => x(r.b)).attr('y', hh - 6).attr('text-anchor', 'middle').attr('class', (r) => (r.b > lastD ? null : 'lbl-strong')).text((r) => BULAN[r.b - 1]);
     const ln = (k, yy) => d3.line().defined((r) => r[k] != null).x((r) => x(r.b)).y((r) => yy(r[k]));
-    svg.append('path').datum(rows).attr('d', ln('rs', y)).style('fill', 'none').style('stroke', 'var(--cds-chart-muted)').style('stroke-width', 2.5);
+    svg.append('path').datum(rows).attr('d', ln('rs', y)).style('fill', 'none').style('stroke', dash.colors[1]).style('stroke-width', 2.5);
+    svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.b)).attr('cy', (r) => y(r.rs)).attr('r', 2.5).style('fill', dash.colors[1]);
     svg.append('path').datum(rows).attr('d', ln('as', y)).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 2.5);
     svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.b)).attr('cy', (r) => y(r.as)).attr('r', 3).style('fill', dash.colors[0]);
     const pr = rows.filter((r) => r.pct != null);
