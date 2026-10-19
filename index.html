@@ -51,7 +51,12 @@
 html,body{margin:0}
 [hidden]{display:none!important}
 img{max-width:100%}
-body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);line-height:1.5}
+/* latar: aksen pembangkit (PLTA, PLTB, PLTD, PLTS) tipis di bawah layar */
+body{background-color:var(--color-bg);background-image:radial-gradient(1200px 520px at 100% -10%,rgba(31,143,207,.10),transparent 60%),radial-gradient(900px 420px at -10% 0%,rgba(242,196,15,.08),transparent 60%),url(bg-light.svg);background-repeat:no-repeat;background-position:0 0,0 0,center bottom;background-size:auto,auto,min(1600px,100%) auto;background-attachment:fixed}
+:root[data-mode=dark] body{background-image:radial-gradient(1200px 520px at 100% -10%,rgba(90,169,236,.12),transparent 60%),radial-gradient(900px 420px at -10% 0%,rgba(242,196,15,.06),transparent 60%),url(bg-dark.svg)}
+@media (prefers-color-scheme: dark){:root:not([data-mode=light]) body{background-image:radial-gradient(1200px 520px at 100% -10%,rgba(90,169,236,.12),transparent 60%),radial-gradient(900px 420px at -10% 0%,rgba(242,196,15,.06),transparent 60%),url(bg-dark.svg)}}
+.exporting body,html.exporting body{background-image:none!important}
+body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);line-height:1.5}
 #dash-root{max-width:1400px;margin-inline:auto;padding:max(20px,env(safe-area-inset-top)) clamp(16px,3vw,40px) 40px}
 .dash-skeleton{color:transparent!important;background:var(--cds-chart-muted);border-radius:6px;min-width:3ch;display:inline-block}
 .oh-pdf{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid var(--color-border-line);background:var(--color-panel);color:var(--color-fg);font-size:var(--cds-font-size-caption);white-space:nowrap}
