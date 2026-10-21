@@ -33,6 +33,38 @@
     });
   }
 
+  // Titik potong halaman: kartu yang muat satu halaman tidak boleh terbelah (dipindah utuh ke halaman berikut);
+  // kartu yang lebih tinggi dari satu halaman boleh dipotong di antara baris, tapi tidak tepat setelah judulnya.
+  function buatPotongan(root, totalH, pageH) {
+    const t0 = root.getBoundingClientRect().top;
+    const kotak = (sel) => [...root.querySelectorAll(sel)].filter((el) => el.offsetParent !== null)
+      .map((el) => { const r = el.getBoundingClientRect(); return [Math.round(r.top - t0), Math.round(r.bottom - t0)]; })
+      .filter(([a, b]) => b > a);
+    const utuh = kotak('.oh-kpi, .oh-pocard, tr, .oh-legend, header.oh-head, .oh-subtabs, .oh-chart, .oh-top, .oh-card > h2, .oh-card > .note, .oh-card li, .oh-notes, .web-foot, .oh-page > .note, .lede');
+    const blok = kotak('.oh-card, .oh-kpis');
+    const kandidat = new Set();
+    [...utuh, ...blok].forEach(([a, b]) => { kandidat.add(a); kandidat.add(b); kandidat.add(a - 6); kandidat.add(b + 6); });
+    const sah = (y) => {
+      if (utuh.some(([a, b]) => y > a && y < b)) return false;
+      return blok.every(([a, b]) => {
+        if (!(y > a && y < b)) return true;
+        if (b - a <= pageH * 0.95) return false;        // kartu muat 1 halaman: jangan dibelah
+        return y >= a + 140 && y <= b - 40;             // kartu besar: sisakan judul + beberapa baris
+      });
+    };
+    const pts = [...kandidat].filter((y) => y > 0 && y < totalH && sah(y)).sort((a, b) => a - b);
+    const out = []; let y0 = 0;
+    while (y0 < totalH - 2) {
+      let y1 = Math.min(totalH, y0 + pageH);
+      if (y1 < totalH) {
+        const c = pts.filter((p) => p > y0 + pageH * 0.2 && p <= y0 + pageH);
+        if (c.length) y1 = c[c.length - 1];
+      }
+      out.push([y0, y1]); y0 = y1;
+    }
+    return out;
+  }
+
   let jalan = false;
   async function ekspor(tab, btn) {
     if (jalan) return;
@@ -51,10 +83,6 @@
       await wait(450); await frame();
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
 
-      const rootTop = root.getBoundingClientRect().top;
-      const breaks = new Set();
-      root.querySelectorAll('.oh-top, header.oh-head, .oh-kpis, .oh-kpi, .oh-card, .oh-pocard, tr, .oh-legend, .web-foot, .oh-page > .note, svg > g')
-        .forEach((el) => { if (el.offsetParent !== null) breaks.add(Math.round(el.getBoundingClientRect().top - rootTop)); });
 
       const scale = 2;
       const canvas = await window.html2canvas(root, { scale, backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff', useCORS: true, logging: false, windowWidth: W_EXPORT + 80 });
@@ -66,16 +94,7 @@
       const pxPerMm = canvas.width / scale / cw;          // px CSS per mm
       const pageH = Math.floor(ch * pxPerMm);              // tinggi konten per halaman (px CSS)
       const totalH = canvas.height / scale;
-      const pts = [...breaks].filter((y) => y > 0 && y < totalH).sort((a, b) => a - b);
-      const slices = []; let y0 = 0;
-      while (y0 < totalH - 2) {
-        let y1 = Math.min(totalH, y0 + pageH);
-        if (y1 < totalH) {
-          const cand = pts.filter((p) => p > y0 + pageH * 0.45 && p <= y0 + pageH);
-          if (cand.length) y1 = cand[cand.length - 1];
-        }
-        slices.push([y0, y1]); y0 = y1;
-      }
+      const slices = buatPotongan(root, totalH, pageH);
       const tgl = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       slices.forEach(([a, b], i) => {
         if (i) pdf.addPage();
