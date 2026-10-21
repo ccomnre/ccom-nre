@@ -533,7 +533,7 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
     </header>
     <section class="oh-kpis" id="kpi-harian" aria-label="Angka harian">
       <div class="oh-kpi"><span class="lbl">PO &amp; MO berjalan</span><span class="big dash-skeleton lx-h-n" data-source="harian_ringkas" data-row="0" data-field="n_po">—</span><span class="sub"><span class="lx-h-mw" data-source="harian_ringkas" data-row="0" data-field="mw_po">—</span> MW keluar</span></div>
-      <div class="oh-kpi"><span class="lbl">Leading / lagging</span><span class="big dash-skeleton" data-source="harian_ringkas" data-row="0" data-field="n_leading">—</span><span class="sub">leading · <b class="lx-h-lag" data-source="harian_ringkas" data-row="0" data-field="n_lagging">—</b> lagging · <b data-source="harian_ringkas" data-row="0" data-field="n_finish">—</b> selesai</span></div>
+      <div class="oh-kpi"><span class="lbl">Leading / lagging</span><span class="big dash-skeleton" data-source="harian_ringkas" data-row="0" data-field="n_leading">—</span><span class="sub">leading · <b class="lx-h-lag" data-source="harian_ringkas" data-row="0" data-field="n_lagging">—</b> lagging · <b data-source="harian_ringkas" data-row="0" data-field="n_ext_jalan">—</b> extend · <b data-source="harian_ringkas" data-row="0" data-field="n_finish">—</b> selesai</span></div>
       <div class="oh-kpi"><span class="lbl">Forced outage berjalan</span><span class="big dash-skeleton" data-source="harian_ringkas" data-row="0" data-field="n_fo">—</span><span class="sub"><span data-source="harian_ringkas" data-row="0" data-field="mw_fo">—</span> MW keluar</span></div>
       <div class="oh-kpi"><span class="lbl">Upcoming 30 hari</span><span class="big dash-skeleton" data-source="harian_ringkas" data-row="0" data-field="n_upcoming">—</span><span class="sub">OH akan mulai</span></div>
       <div class="oh-kpi"><span class="lbl">Pending 2026</span><span class="big dash-skeleton" data-source="harian_ringkas" data-row="0" data-field="n_pending">—</span><span class="sub">OH belum terlaksana</span></div>
@@ -1013,9 +1013,15 @@ dash.loader('harian_po', {
       // kolom P = Finish (centang), Q = durasi realisasi
       // selesai = kolom Finish tercentang ATAU realisasi sudah 100%
       o.done = o.finish || (o.realisasi_pct != null && o.realisasi_pct >= 0.9995);
+      // status progres unit yang masih berjalan: ikut kolom Status di sheet (LEADING/LAGGING/EXTEND/ONTIME),
+      // kalau kosong dihitung: hari ke > durasi = Extend, realisasi >= rencana = Leading, selain itu Lagging
+      const st = String(o.status_progress || '').toUpperCase().replace(/\s+/g, '');
+      o.prog = o.done ? null : st.includes('EXTEND') ? 'Extend' : st.includes('LAGG') ? 'Lagging' : st.includes('LEAD') ? 'Leading' : st.includes('ONTIME') ? 'On time'
+        : o.hari_ke != null && o.durasi != null && o.hari_ke > o.durasi ? 'Extend'
+        : o.realisasi_pct != null && o.rencana_pct != null ? (o.realisasi_pct >= o.rencana_pct ? 'Leading' : 'Lagging') : null;
       o.hasil = !o.done ? null : !o.finish || o.durasi_real == null || o.durasi == null ? 'Selesai' : o.durasi_real < o.durasi ? 'Optimized' : o.durasi_real === o.durasi ? 'On time' : 'Finished with extend';
     }
-    return { data: rows, columns: ['unit', 'up', 'dmn_mw', 'scope', 'durasi', 'mulai', 'selesai', 'hari_ke', 'rencana_pct', 'realisasi_pct', 'status_progress', 'status', 'finish', 'done', 'hasil', 'durasi_real', 'mulai_real', 'selesai_real', 'keterangan', 'tanggal', 'update'], meta: [{ label: 'Update di sheet', value: upd || '—' }] };
+    return { data: rows, columns: ['unit', 'up', 'dmn_mw', 'scope', 'durasi', 'mulai', 'selesai', 'hari_ke', 'rencana_pct', 'realisasi_pct', 'status_progress', 'status', 'prog', 'finish', 'done', 'hasil', 'durasi_real', 'mulai_real', 'selesai_real', 'keterangan', 'tanggal', 'update'], meta: [{ label: 'Update di sheet', value: upd || '—' }] };
   },
 });
 
@@ -1117,8 +1123,9 @@ dash.calc('harian_ringkas', {
   fn: (harian_po, harian_fo, nre_upcoming) => [{
     n_po: harian_po.filter((r) => !r.done).length,
     mw_po: Math.round(harian_po.filter((r) => !r.done).reduce((s, r) => s + (r.dmn_mw || 0), 0) * 100) / 100,
-    n_leading: harian_po.filter((r) => !r.done && r.realisasi_pct != null && r.rencana_pct != null && r.realisasi_pct >= r.rencana_pct).length,
-    n_lagging: harian_po.filter((r) => !r.done && r.realisasi_pct != null && r.rencana_pct != null && r.realisasi_pct < r.rencana_pct).length,
+    n_leading: harian_po.filter((r) => !r.done && (r.prog === 'Leading' || r.prog === 'On time')).length,
+    n_lagging: harian_po.filter((r) => !r.done && r.prog === 'Lagging').length,
+    n_ext_jalan: harian_po.filter((r) => !r.done && r.prog === 'Extend').length,
     n_finish: harian_po.filter((r) => r.done).length,
     n_optimized: harian_po.filter((r) => r.hasil === 'Optimized').length,
     n_ontime: harian_po.filter((r) => r.hasil === 'On time').length,
@@ -1841,7 +1848,8 @@ dash.calc('harian_ringkas', {
         const h = [[k.n_optimized, 'optimized'], [k.n_ontime, 'on time'], [k.n_extend, 'finished with extend']].filter((x) => x[0]).map((x) => `${fInt(x[0])} ${x[1]}`).join(', ');
         s += `; ${fInt(k.n_finish)} sudah selesai${h ? ' (' + h + ')' : ''}`;
       }
-      s += jalan <= 0 ? '.' : k.n_lagging ? `, ${fInt(k.n_lagging)} yang masih berjalan tertinggal dari rencana.` : ', yang masih berjalan sesuai atau di depan rencana.';
+      const masalah = [k.n_lagging ? `${fInt(k.n_lagging)} lagging` : '', k.n_ext_jalan ? `${fInt(k.n_ext_jalan)} extend` : ''].filter(Boolean).join(' dan ');
+      s += jalan <= 0 ? '.' : masalah ? `; yang masih berjalan: ${masalah}.` : ', yang masih berjalan sesuai atau di depan rencana.';
       if (k.n_fo) s += ` ${fInt(k.n_fo)} unit forced outage (${fDec(k.mw_fo)} MW).`;
       s += ` ${fInt(k.n_upcoming)} OH akan mulai dalam 30 hari, ${fInt(k.n_pending)} OH 2026 masih pending.`;
       take.textContent = s;
@@ -1861,7 +1869,8 @@ dash.calc('harian_ringkas', {
       if (!run.length) kosong(box, 'Tidak ada outage periodik/maintenance yang berjalan di laporan.');
       if (!fin.length) kosong(boxD, 'Belum ada outage periodik/maintenance yang selesai di laporan.');
       [...run.map((r) => [box, r]), ...fin.map((r) => [boxD, r])].forEach(([bx, r]) => {
-        const lead = r.done ? null : r.realisasi_pct != null && r.rencana_pct != null ? r.realisasi_pct >= r.rencana_pct : null;
+        const PROG = { Leading: ['s-ok', dash.colors[1]], 'On time': ['s-acc', dash.colors[1]], Lagging: ['s-bad', 'var(--color-bad)'], Extend: ['s-warn', 'var(--color-warn)'] };
+        const ps = r.done ? null : PROG[r.prog] || null;
         const HASIL = { Optimized: ['s-ok', 'var(--color-ok)'], 'On time': ['s-acc', dash.colors[0]], 'Finished with extend': ['s-warn', 'var(--color-warn)'], Finished: ['s-ok', 'var(--color-ok)'], Selesai: ['s-ok', 'var(--color-ok)'] };
         const hs = r.done ? HASIL[r.hasil] : null;
         const c = document.createElement('article'); c.className = 'oh-pocard';
@@ -1870,10 +1879,10 @@ dash.calc('harian_ringkas', {
         const t = document.createElement('b'); t.textContent = r.unit; t.setAttribute('data-source', 'harian_po'); t.setAttribute('data-field', 'unit'); t.setAttribute('data-where', 'unit=' + enc(r.unit));
         const sub = document.createElement('span'); sub.className = 'note'; sub.textContent = `${r.up} · ${r.scope} · ${fDec(r.dmn_mw || 0)} MW`;
         nm.append(t, document.createElement('br'), sub);
-        const pill = document.createElement('span'); pill.className = 'pill ' + (hs ? hs[0] : lead == null ? 's-mut' : lead ? 's-ok' : 's-bad'); pill.textContent = hs ? r.hasil : lead == null ? (r.status_progress || '—') : lead ? 'Leading' : 'Lagging';
+        const pill = document.createElement('span'); pill.className = 'pill ' + (hs ? hs[0] : ps ? ps[0] : 's-mut'); pill.textContent = hs ? r.hasil : ps ? r.prog : (r.status_progress || '—');
         top.append(nm, pill);
         const bar = document.createElement('div'); bar.className = 'oh-pobar';
-        const fill = document.createElement('i'); fill.style.width = Math.min(100, (r.realisasi_pct || 0) * 100) + '%'; fill.style.background = hs ? hs[1] : lead === false ? 'var(--color-bad)' : dash.colors[1];
+        const fill = document.createElement('i'); fill.style.width = Math.min(100, (r.realisasi_pct || 0) * 100) + '%'; fill.style.background = hs ? hs[1] : ps ? ps[1] : dash.colors[1];
         const mk = document.createElement('u'); mk.style.left = Math.min(100, (r.rencana_pct || 0) * 100) + '%'; mk.title = 'Rencana ' + fPct(r.rencana_pct || 0);
         bar.append(fill, mk);
         const nums = document.createElement('div'); nums.className = 'oh-ponums';
