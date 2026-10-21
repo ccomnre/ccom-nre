@@ -138,6 +138,20 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
 .oh-logo{height:48px;width:auto;max-width:100%}
 .oh-divider{width:1px;align-self:stretch;min-height:44px;background:var(--color-border-line)}
 .oh-title{display:grid;gap:10px;min-width:0}
+.oh-slides{position:relative;flex:1 1 260px;max-width:440px;height:112px;border-radius:12px;overflow:hidden;background:var(--cds-chart-muted);border:1px solid var(--color-border-line);margin-left:auto}
+.oh-slides:not([hidden])+.oh-mode{margin-left:0}
+.oh-slide{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .9s ease}
+.oh-slide.on{opacity:1}
+.oh-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.oh-slide figcaption{position:absolute;left:0;right:0;bottom:0;padding:18px 12px 7px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.oh-slide-dots{position:absolute;right:8px;bottom:8px;display:flex;gap:5px;z-index:1}
+.oh-slide-dots button{all:unset;cursor:pointer;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55)}
+.oh-slide-dots button[aria-current="true"]{background:#f5e61c}
+.oh-slide-dots button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (max-width:760px){.oh-slides{flex-basis:100%;max-width:none;height:140px;order:3}}
+@media (min-width:1100px){.oh-brand:has(.oh-slides:not([hidden])){display:grid;grid-template-columns:auto auto auto minmax(220px,1fr) auto;align-items:center}.oh-brand:has(.oh-slides:not([hidden])) .oh-title-main{white-space:nowrap}.oh-brand:has(.oh-slides:not([hidden])) .oh-title{max-width:560px}.oh-brand:has(.oh-slides:not([hidden])) .oh-slides{max-width:none;margin-left:0;height:118px}}
+@media (prefers-reduced-motion: reduce){.oh-slide{transition:none}}
+.exporting .oh-slides{display:none!important}
 .oh-title-main{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(1.6rem,1.1rem + 1.8vw,2.4rem);line-height:1.15;letter-spacing:-.01em;color:var(--color-fg)}
 .oh-title-main em{font-style:normal;color:#2a9fd8;position:relative;z-index:0}
 .oh-title-main em::after{content:"";position:absolute;left:0;right:0;bottom:.04em;height:.14em;background:#f5e61c;border-radius:2px;z-index:-1}
@@ -223,6 +237,7 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
         <span class="oh-title-main">Dashboard <em>Cost Control</em> dan <em>OH</em></span>
         <span class="oh-title-sub"><b>OM NRE</b> · Dashboard Cost Control dan Outage Management: Satu Dashboard Untuk Monitoring Cost Control dan Overhaul Pembangkit</span>
       </div>
+      <div class="oh-slides" role="region" aria-label="Foto unit pembangkit" hidden></div>
       <div class="oh-mode" role="group" aria-label="Tampilan">
         <button type="button" data-mode-btn="light" id="mode-terang" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></g></svg>Terang</button>
         <button type="button" data-mode-btn="dark" id="mode-gelap" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z" fill="currentColor"/></svg>Gelap</button>
@@ -2299,6 +2314,7 @@ dash.onData(() => {
 });
 dash.__start();
 </script>
+<script src="slideshow.js"></script>
 <script src="export.js"></script>
 </body>
 </html>

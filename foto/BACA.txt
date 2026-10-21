@@ -1,0 +1,3 @@
+Taruh foto unit pembangkit di folder ini (JPG, lebar sekitar 800-1200 px, ukuran < 300 KB per foto agar cepat dimuat).
+Lalu daftarkan di config.js bagian fotoSlideshow, contoh:
+  { src: 'foto/plta-cirata.jpg', judul: 'PLTA Cirata' },
