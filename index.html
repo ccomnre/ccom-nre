@@ -209,7 +209,7 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
 .oh-sub td.num{white-space:nowrap}
 .oh-noteh{margin:6px 0 0;font-size:var(--cds-font-size-body);font-weight:600}
 .oh-notes{margin:0;padding-left:1.1em;display:grid;gap:8px;font-size:var(--cds-font-size-body)}
-.oh-notedet{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);margin-top:2px}
+.oh-notedet{color:var(--color-fg);font-size:var(--cds-font-size-body);line-height:1.55;margin-top:3px}
 .oh-lag{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:var(--cds-gap-md)}
 .oh-period{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .oh-dates{display:inline-flex;gap:4px;align-items:center;color:var(--color-fg-muted)}
@@ -381,12 +381,16 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
             </table>
           </div>
         </div>
+        <div class="oh-card wide" id="cost-har-ket">
+          <h2>Keterangan biaya pemeliharaan <span class="lx-cket-per"></span></h2>
+          <p class="lx-cket-biaya" style="margin:0;line-height:1.6">—</p>
+        </div>
         <div class="oh-card wide" id="cost-ej">
           <h2>Progres fisik project</h2>
           <p class="note">Jumlah pekerjaan project engineering per tahap, posisi terkini.</p>
           <div class="oh-legend lx-cej-lg"></div>
           <div class="oh-chart lx-cej" data-source="cc_ej" style="min-height:200px"></div>
-          <h3 class="oh-noteh">Keterangan progres fisik project</h3>
+          <h3 class="oh-noteh">Keterangan progres fisik project <span class="lx-cket-per"></span></h3>
           <div class="lx-cej-note" data-source="cc_ej"></div>
         </div>
       </section>
@@ -436,7 +440,7 @@ body{color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(
         </div>
         <div class="oh-card wide" id="cost-lag">
           <h2>Keterangan lagging</h2>
-          <p class="note">UP yang realisasinya di bawah rencana sampai bulan data terakhir dalam periode terpilih, dihitung otomatis dari data. Rincian program dan kendalanya diambil dari catatan laporan Data Studio per <span class="lx-clag-tgl">—</span>.</p>
+          <p class="note">Program yang tertinggal dari rencana kontrak dan disburse, dari laporan Data Studio <span class="lx-clag-tgl">—</span>.</p>
           <div class="oh-lag">
             <div><h3 class="oh-noteh">Lagging kontrak AI</h3><div class="lx-clag-ai" data-source="cc_ai"></div></div>
             <div><h3 class="oh-noteh">Lagging disburse AKI</h3><div class="lx-clag-aki" data-source="cc_aki"></div></div>
@@ -2230,17 +2234,33 @@ dash.calc('harian_ringkas', {
 
   // ---------- keterangan cost control ----------
   const CC_NOTE_TGL = '13 Okt 2026';
-  const CC_NOTE = {
-    ai: {
-      'UP Bakaru': 'Retrofit Sistem Governor PLTA Bakaru Unit 1; Pengadaan PMT Generator PLTM Sawitto Unit 1, 2, dan 3.',
-    },
-    aki: {
-      'UP Bakaru': 'Rebundle Rubber Coupling Engine PLTD Suppa Engine #1 dan Engine #2 (Pengadaan Inner Part Untuk Cylinder Head PLTD Suppa) (wan prestasi; proses kontrak kembali, target Oktober); Retrofit Oil Mist Detector Engine 2,3,4,6 PLTD Suppa (unit masih diminta operasi oleh sistem; menunggu jadwal Okt/Nov).',
-      'UP Minahasa': 'Major Overhaul Mesin Mitsubishi Unit 6 ULPLTD Tahuna (koordinasi dispute dengan PT STUR); Retrofit AVR Unit 1, Unit 2 dan Unit 3 PLTA Tonsealama (proses instalasi); Retrofit rectifier PLTA Tonsealama (levering material); Digitalisasi AVR Unit 4 PLTA Tanggari (terbayar Okt).',
-      'UP Pandan': 'Retrofit Sistem AVR PLTA Sipansihaporas #02 (proses bayar); Pengadaan Fire Hydrant PLTA Renun (terdapat rework jasa, target fisik selesai Oktober); Pengadaan Deluge Water Spray Sistem Main Transformer PLTA Sipansihaporas #01 dan #02 (pengujian M3 Okt); Remotisasi Pembangkit UP Pandan (Okt commissioning); Revitalisasi Pintu Air PLTA Renun Tahap 1 (terbayar Nov); Pengadaan Fire Hydrant PLTA Renun (terbayar Nov); Pengadaan Fire Suppresion PLTMH Tersebar (terbayar Okt).',
-      'UP Brantas': 'Pemasangan Fire Protection Area MTR UP Brantas (terbayar Nov).',
-    },
+  // keterangan Biaya Pemeliharaan dari laporan Data Studio (diperbarui manual)
+  const CC_KET_HAR = {
+    periode: 's.d. Oktober 2026',
+    biaya: 'Realisasi bulanan UP Bakaru, UP Brantas, dan UP Cirata berada di atas 90%, sedangkan UP Bandar Lampung, UP Minahasa, dan UP Pandan di bawah 90% terhadap rencana. Secara kumulatif unit di bawah NRE mencapai 89,73% terhadap rencana s.d. Oktober 2026.',
+    fisik: [
+      ['UP Brantas', '1 program belum terkontrak dan 5 program terkontrak/levering/instalasi.'],
+      ['UP Bakaru', '3 program instalasi.'],
+      ['UP Bandar Lampung', '1 program belum terkontrak dan 2 program levering/instalasi.'],
+      ['UP Minahasa', '2 program levering.'],
+    ],
   };
+  const CC_NOTE = { ai: {}, aki: {} };
+  // keterangan lagging dari laporan Data Studio (diperbarui manual)
+  const CC_LAG = {
+    periode: 's.d. Oktober 2026',
+    ai: [
+      ['UP Bakaru', '5', 'Retrofit Sistem Governor PLTA Bakaru Unit 1; Pengadaan PMT Generator PLTM Sawitto Unit 1, 2 dan 3; Pekerjaan Rehabilitasi Sipil PLTM Kalukku; Pengadaan Strategic Part Turbocharger 1 Set (Bank A dan Bank B) PLTD Suppa; Upgrade Safety Monitoring Bendungan PLTA Bakaru.'],
+      ['UP Bandar Lampung', '1', 'Pengadaan Main Transformer PLTD Teluk Betung Unit 7, 8 dan 10.'],
+    ],
+    aki: [
+      ['UP Bakaru', '1,12 M', 'Rebundle Rubber Coupling Engine PLTD Suppa Engine #1 dan Engine #2 (Pengadaan Inner Part Untuk Cylinder Head PLTD Suppa) (wan prestasi; proses kontrak kembali, target Oktober; sebagian pekerjaan sudah terdisburse pada 2026).'],
+      ['UP Minahasa', '10,4 M', 'Major Overhaul Mesin Mitsubishi Unit 6 ULPLTD Tahuna (koordinasi dispute dengan PT STUR); Retrofit AVR Unit 1, Unit 2 dan Unit 3 PLTA Tonsealama (revisi AKI ke 2027); Retrofit rectifier PLTA Tonsealama (levering material, revisi AKI ke 2027); Digitalisasi AVR Unit 4 PLTA Tanggari (terbayar Nov); Pengadaan EDG Blackstart PLTD Bitung (terbayar Nov).'],
+      ['UP Pandan', '25,17 M', 'Retrofit Sistem AVR PLTA Sipansihaporas #02 Tahap 2 Bayar; Pengadaan Fire Hydrant PLTA Sipansihaporas #01 dan #02; Pengadaan Fire Hydrant PLTA Renun; Pengadaan Deluge Water Spray Sistem Main Transformer PLTA Sipansihaporas #01 dan #02 - Item 2; Remotisasi Pembangkit UP Pandan (pusat) Tahap 2 Bayar; Remotisasi Pembangkit UP Pandan (unit); Revitalisasi Pintu Air PLTA Renun Tahap 1.'],
+      ['UP Brantas', '1,68 M', 'Retrofit Relay Proteksi Generator dan MTR PLTA Wlingi #1; Pemasangan Fire Protection Area MTR UP Brantas (terbayar Nov).'],
+    ],
+  };
+
   const noteList = (box, items, emptyTxt) => {
     box.replaceChildren();
     if (!items.length) { const p = document.createElement('p'); p.className = 'note'; p.textContent = emptyTxt; box.appendChild(p); return; }
@@ -2256,45 +2276,23 @@ dash.calc('harian_ringkas', {
   };
 
   function drawEjNote(E, up) {
+    root.querySelectorAll('.lx-cket-per').forEach((el) => { el.textContent = CC_KET_HAR.periode; });
+    const kb = root.querySelector('.lx-cket-biaya'); if (kb) kb.textContent = CC_KET_HAR.biaya;
     const box = root.querySelector('.lx-cej-note'); if (!box) return;
-    if (E.status !== 'ok') { box.replaceChildren(); return; }
-    const BELUM = ['Belum Proses', 'TOR', 'RO', 'HPS', 'Aanwijzing'], JALAN = ['Kontrak', 'Levering', 'Instalasi'];
-    const units = [...new Set(E.data.map((r) => r.unit))].filter((u) => up === ALL || u === up);
-    const desc = (rows, list) => list.map((t) => [t, d3.sum(rows.filter((r) => r.tahap === t), (r) => r.jumlah)]).filter((x) => x[1]).map(([t, n]) => `${n} ${t === 'Belum Proses' ? 'belum proses' : t.toLowerCase()}`).join(', ');
-    const items = [];
-    const line = (u, rows) => {
-      const nb = d3.sum(rows.filter((r) => BELUM.includes(r.tahap)), (r) => r.jumlah), nj = d3.sum(rows.filter((r) => JALAN.includes(r.tahap)), (r) => r.jumlah), ns = d3.sum(rows.filter((r) => r.tahap === 'BA'), (r) => r.jumlah);
-      if (!nb && !nj && !ns) return { head: u + ':', sub: 'tidak ada pekerjaan project.' };
-      const parts = [];
-      if (nb) parts.push(`${nb} belum terkontrak (${desc(rows, BELUM)})`);
-      if (nj) parts.push(`${nj} terkontrak/levering/instalasi (${desc(rows, JALAN)})`);
-      if (ns) parts.push(`${ns} selesai BA`);
-      return { head: u + ':', sub: parts.join('; ') + '.' };
-    };
-    units.forEach((u) => items.push(line(u, E.data.filter((r) => r.unit === u))));
-    if (up === ALL) items.push(line('O&M NRE', E.data));
-    noteList(box, items, 'Tidak ada data progres fisik.');
+    const items = CC_KET_HAR.fisik.filter(([u]) => up === ALL || u === up).map(([u, t]) => ({ head: u + ':', sub: t }));
+    noteList(box, items, up === ALL ? 'Belum ada keterangan progres fisik.' : 'Tidak ada keterangan progres fisik untuk ' + up + '.');
   }
+
 
   function drawLagNote(A, K, R, up, units) {
     const boxA = root.querySelector('.lx-clag-ai'), boxK = root.querySelector('.lx-clag-aki');
-    root.querySelectorAll('.lx-clag-tgl').forEach((el) => { el.textContent = CC_NOTE_TGL; });
-    // lagging dihitung terhadap rencana sampai bulan data terakhir (bukan target setahun)
-    R = { m1: R.m1, m2: Math.min(R.m2, ccLast) };
-    const list = (D, kind) => {
-      if (D.status !== 'ok' || R.m1 > R.m2) return [];
-      return units.filter((u) => up === ALL || u === up).map((u) => ({ u, ...ccSum(D.data, R, u) }))
-        .map((o) => ({ ...o, lag: o.rencana_sd - o.realisasi_sd })).filter((o) => o.lag > (kind === 'ai' ? 0 : 100000))
-        .sort((x, y) => y.lag - x.lag)
-        .map((o) => ({
-          head: `${o.u} (${kind === 'ai' ? fInt(o.lag) + ' program' : fRpM(o.lag)})`,
-          sub: kind === 'ai' ? `· terkontrak ${fInt(o.realisasi_sd)} dari ${fInt(o.rencana_sd)} rencana` : `· disburse ${fRpM(o.realisasi_sd)} dari ${fRpM(o.rencana_sd)} rencana (${fPct2(o.pct)})`,
-          det: CC_NOTE[kind][o.u] || null,
-        }));
-    };
-    noteList(boxA, list(A, 'ai'), 'Tidak ada UP yang tertinggal dari rencana kontrak pada periode ini.');
-    noteList(boxK, list(K, 'aki'), 'Tidak ada UP yang tertinggal lebih dari Rp 0,1 M dari rencana disburse pada periode ini.');
+    root.querySelectorAll('.lx-clag-tgl').forEach((el) => { el.textContent = CC_LAG.periode; });
+    const list = (rows, kind) => rows.filter(([u]) => up === ALL || u === up)
+      .map(([u, n, t]) => ({ head: `${u} (${kind === 'ai' ? n + ' program' : 'Rp ' + n})`, sub: '', det: t }));
+    noteList(boxA, list(CC_LAG.ai, 'ai'), up === ALL ? 'Tidak ada lagging kontrak AI.' : 'Tidak ada lagging kontrak AI untuk ' + up + '.');
+    noteList(boxK, list(CC_LAG.aki, 'aki'), up === ALL ? 'Tidak ada lagging disburse AKI.' : 'Tidak ada lagging disburse AKI untuk ' + up + '.');
   }
+
 
   // ---------- mode terang / gelap ----------
   const html = document.documentElement;
